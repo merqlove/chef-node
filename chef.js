@@ -4,7 +4,7 @@ var authenticate = require('./chef/authenticate'),
 
 function Chef(user, key, base, how) {
     this.user = user;
-    this.key = getKey(key, how);
+    this.key = authenticate.getKey(key, how);
     this.base = base ? base : '';
     this.how = how ? how : '';
 }
@@ -22,7 +22,7 @@ function req(method, uri, body, callback) {
 
     return request({
         body: body,
-        headers: authenticate(this, { body: body, method: method, uri: uri, how: this.how }),
+        headers: authenticate.getHeaders(this, { body: body, method: method, uri: uri, how: this.how }),
         json: true,
         method: method,
         uri: uri

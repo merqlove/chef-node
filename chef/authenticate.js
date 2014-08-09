@@ -28,14 +28,14 @@ function signRsa(key, req) {
 
 // Create signed key from key and canonical request
 function getUrsa(key) {
-  var pkey = require('ursa').coercePrivateKey;
-  return pkey(key);
+    var pkey = require('ursa').coercePrivateKey;
+    return pkey(key);
 }
 
 // Create signed key from key and canonical request
 function getRsa(key) {
-  var nrsa = require('node-rsa');
-  return new nrsa(key);
+    var nrsa = require('node-rsa');
+    return new nrsa(key);
 }
 
 // Generate a timestamp, formatted how Chef wants it
@@ -50,7 +50,7 @@ function timestamp() {
 //
 // Returns an object that includes the required headers for authenticating with
 // Chef.
-module.exports = function authenticate(client, options) {
+module.exports.getHeaders = function(client, options) {
     var bh = bodyHash(options.body),
         ph = pathHash(options.uri),
         signMethod = (options.how === 'rsa')
@@ -83,8 +83,8 @@ module.exports = function authenticate(client, options) {
 
 // Function used internally to build RSA key onject.
 //
-module.exports = function getKey(key, options) {
-  return (options.how === 'rsa')
-    ? getRsa(key)
-    : getUrsa(key);
+module.exports.getKey = function(key, options) {
+    return (options.how === 'rsa')
+      ? getRsa(key)
+      : getUrsa(key);
 };
