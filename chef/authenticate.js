@@ -1,6 +1,8 @@
 var hash = require('crypto').createHash,
     url = require('url'),
-    pkey = require('ursa').coercePrivateKey;
+    pkey = require('ursa').coercePrivateKey,
+    nrsa = require('node-rsa');
+
 
 // Create a base64 encoded SHA1 hash from a string
 function sha1(str) {
@@ -18,8 +20,13 @@ function pathHash(uri) {
 }
 
 // Create signed key from key and canonical request
-function sign(key, req) {
+function signUrsa(key, req) {
     return pkey(key).privateEncrypt(req, 'utf8', 'base64');
+}
+
+// Create signed key from key and canonical request
+function signRsa(key, req) {
+  return new nrsa(key).encrypt(req, 'base64', 'utf8');
 }
 
 // Generate a timestamp, formatted how Chef wants it
@@ -37,6 +44,9 @@ function timestamp() {
 module.exports = function authenticate(client, options) {
     var bh = bodyHash(options.body),
         ph = pathHash(options.uri),
+        signMethod = (options.how === 'rsa')
+          ? signRsa
+          : signUrsa,
         ts = timestamp(),
         user = client.user,
         canonicalReq, headers;
@@ -55,7 +65,7 @@ module.exports = function authenticate(client, options) {
         'X-Ops-UserId': user
     };
 
-    sign(client.key, canonicalReq).match(/.{1,60}/g).forEach(function (hash, line) {
+    signMethod(client.key, canonicalReq).match(/.{1,60}/g).forEach(function (hash, line) {
         headers['X-Ops-Authorization-' + (line + 1)] = hash;
     });
 
