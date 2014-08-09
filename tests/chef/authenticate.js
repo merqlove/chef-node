@@ -6,9 +6,9 @@ var authenticate = require('../../chef/authenticate'),
 describe('authenticate', function () {
     beforeEach(function () {
         this.clock = sinon.useFakeTimers(0);
-        this.client = { user: 'test', key: key };
+        this.client = { user: 'test', key: authenticate.getKey(key) };
         this.options = { body: '', uri: 'https://example.com/test' };
-        this.headers = authenticate(this.client, this.options);
+        this.headers = authenticate.getHeaders(this.client, this.options);
     });
 
     afterEach(function () {

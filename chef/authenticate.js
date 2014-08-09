@@ -17,25 +17,13 @@ function pathHash(uri) {
 }
 
 // Create signed key from key and canonical request
-function signUrsa(key, req) {
+function sign(key, req) {
     return key.privateEncrypt(req, 'utf8', 'base64');
 }
 
 // Create signed key from key and canonical request
-function signRsa(key, req) {
-    return key.encrypt(req, 'base64', 'utf8');
-}
-
-// Create signed key from key and canonical request
-function getUrsa(key) {
-    var pkey = require('ursa').coercePrivateKey;
-    return pkey(key);
-}
-
-// Create signed key from key and canonical request
-function getRsa(key) {
-    var nrsa = require('node-rsa');
-    return new nrsa(key);
+function load_key(key) {
+    return require('ursa').coercePrivateKey(key);
 }
 
 // Generate a timestamp, formatted how Chef wants it
@@ -53,9 +41,6 @@ function timestamp() {
 module.exports.getHeaders = function(client, options) {
     var bh = bodyHash(options.body),
         ph = pathHash(options.uri),
-        signMethod = (options.how === 'rsa')
-          ? signRsa
-          : signUrsa,
         ts = timestamp(),
         user = client.user,
         canonicalReq, headers;
@@ -74,7 +59,7 @@ module.exports.getHeaders = function(client, options) {
         'X-Ops-UserId': user
     };
 
-    signMethod(client.key, canonicalReq).match(/.{1,60}/g).forEach(function (hash, line) {
+    sign(client.key, canonicalReq).match(/.{1,60}/g).forEach(function (hash, line) {
         headers['X-Ops-Authorization-' + (line + 1)] = hash;
     });
 
@@ -83,8 +68,6 @@ module.exports.getHeaders = function(client, options) {
 
 // Function used internally to build RSA key onject.
 //
-module.exports.getKey = function(key, options) {
-    return (options.how === 'rsa')
-      ? getRsa(key)
-      : getUrsa(key);
+module.exports.getKey = function(key) {
+    return load_key(key);
 };
