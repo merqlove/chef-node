@@ -1,5 +1,6 @@
 var hash = require('crypto').createHash,
-    url = require('url');
+    url = require('url'),
+    pkey = require('ursa').coercePrivateKey;
 
 // Create a base64 encoded SHA1 hash from a string
 function sha1(str) {
@@ -23,7 +24,7 @@ function sign(key, req) {
 
 // Create signed key from key and canonical request
 function load_key(key) {
-    return require('ursa').coercePrivateKey(key);
+    return pkey(key);
 }
 
 // Generate a timestamp, formatted how Chef wants it
