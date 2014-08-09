@@ -67,7 +67,7 @@ module.exports.getHeaders = function(client, options) {
     return headers;
 };
 
-// Function used internally to build RSA key onject.
+// Function used internally to provide RSA key object for client.
 //
 module.exports.getKey = function(key) {
     return load_key(key);
