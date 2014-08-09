@@ -1,7 +1,5 @@
 var hash = require('crypto').createHash,
-    url = require('url'),
-    pkey = require('ursa').coercePrivateKey,
-    nrsa = require('node-rsa');
+    url = require('url');
 
 
 // Create a base64 encoded SHA1 hash from a string
@@ -21,12 +19,14 @@ function pathHash(uri) {
 
 // Create signed key from key and canonical request
 function signUrsa(key, req) {
+    var pkey = require('ursa').coercePrivateKey;
     return pkey(key).privateEncrypt(req, 'utf8', 'base64');
 }
 
 // Create signed key from key and canonical request
 function signRsa(key, req) {
-  return new nrsa(key).encrypt(req, 'base64', 'utf8');
+    var nrsa = require('node-rsa');
+    return new nrsa(key).encrypt(req, 'base64', 'utf8');
 }
 
 // Generate a timestamp, formatted how Chef wants it

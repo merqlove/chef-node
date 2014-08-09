@@ -2,10 +2,11 @@ var authenticate = require('./chef/authenticate'),
     request = require('request'),
     methods = ['delete', 'get', 'post', 'put'];
 
-function Chef(user, key, base) {
+function Chef(user, key, base, how) {
     this.user = user;
     this.key = key;
     this.base = base ? base : '';
+    this.how = how ? how : '';
 }
 
 function req(method, uri, body, callback) {
@@ -21,7 +22,7 @@ function req(method, uri, body, callback) {
 
     return request({
         body: body,
-        headers: authenticate(this, { body: body, method: method, uri: uri }),
+        headers: authenticate(this, { body: body, method: method, uri: uri, how: this.how }),
         json: true,
         method: method,
         uri: uri
@@ -34,6 +35,6 @@ methods.forEach(function (method) {
     };
 });
 
-exports.createClient = function (user, key, server) {
-    return new Chef(user, key, server);
+exports.createClient = function (user, key, server, how) {
+    return new Chef(user, key, server, how);
 };
