@@ -1,3 +1,4 @@
 tests
-.travis
+.travis.yml
+.idea
 node_modules
