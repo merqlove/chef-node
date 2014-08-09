@@ -7,7 +7,7 @@ describe('authenticate', function () {
     beforeEach(function () {
         this.clock = sinon.useFakeTimers(0);
         this.client = { user: 'test', key: key };
-        this.options = { body: '', uri: 'https://example.com/test', how: 'rsa' };
+        this.options = { body: '', uri: 'https://example.com/test' };
         this.headers = authenticate(this.client, this.options);
     });
 

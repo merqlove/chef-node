@@ -4,7 +4,7 @@ var authenticate = require('./chef/authenticate'),
 
 function Chef(user, key, base, how) {
     this.user = user;
-    this.key = key;
+    this.key = getKey(key, how);
     this.base = base ? base : '';
     this.how = how ? how : '';
 }

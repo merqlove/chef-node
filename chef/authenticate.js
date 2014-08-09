@@ -1,7 +1,6 @@
 var hash = require('crypto').createHash,
     url = require('url');
 
-
 // Create a base64 encoded SHA1 hash from a string
 function sha1(str) {
     return hash('sha1').update(str).digest('base64');
@@ -19,14 +18,24 @@ function pathHash(uri) {
 
 // Create signed key from key and canonical request
 function signUrsa(key, req) {
-    var pkey = require('ursa').coercePrivateKey;
-    return pkey(key).privateEncrypt(req, 'utf8', 'base64');
+    return key.privateEncrypt(req, 'utf8', 'base64');
 }
 
 // Create signed key from key and canonical request
 function signRsa(key, req) {
-    var nrsa = require('node-rsa');
-    return new nrsa(key).encrypt(req, 'base64', 'utf8');
+    return key.encrypt(req, 'base64', 'utf8');
+}
+
+// Create signed key from key and canonical request
+function getUrsa(key) {
+  var pkey = require('ursa').coercePrivateKey;
+  return pkey(key);
+}
+
+// Create signed key from key and canonical request
+function getRsa(key) {
+  var nrsa = require('node-rsa');
+  return new nrsa(key);
 }
 
 // Generate a timestamp, formatted how Chef wants it
@@ -70,4 +79,12 @@ module.exports = function authenticate(client, options) {
     });
 
     return headers;
+};
+
+// Function used internally to build RSA key onject.
+//
+module.exports = function getKey(key, options) {
+  return (options.how === 'rsa')
+    ? getRsa(key)
+    : getUrsa(key);
 };
