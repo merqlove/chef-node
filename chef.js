@@ -4,7 +4,7 @@ var authenticate = require('./chef/authenticate'),
 
 function Chef(user, key, base, wrap_ssl, opensslPath) {
     if (wrap_ssl && opensslPath && authenticate.fs.existsSync !== undefined && !authenticate.fs.existsSync(opensslPath)) {
-        return new Error(opensslPath + ': No such file or directory');
+        throw new Error(opensslPath + ': No such file or directory');
     }
     this.user = user;
     this.key = key;
