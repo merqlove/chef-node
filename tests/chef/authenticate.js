@@ -10,7 +10,7 @@ describe('authenticate', function () {
         this.options = { body: '', uri: 'https://example.com/test', wrap_ssl: true, opensslPath: '/usr/bin/openssl' };
         var self = this;
         authenticate.getHeaders(this.client, this.options, function(err, headers){
-          if(err) throw err;
+          if(err) done(err);
           self.headers = headers;
           done(null, true);
         });
