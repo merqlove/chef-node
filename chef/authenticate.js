@@ -8,21 +8,28 @@ tmp.setGracefulCleanup();
 
 // Create signed key from key and canonical request via CMD
 function sign_cmd(privateKey, plaintext, options, cb) {
-    tmp.file(function(err, path) {
+    tmp.file(function(err, path, fd, removeTmp) {
         if (err) return cb(err);
 
-        fs.writeFileSync(path, plaintext);
-
-        var cmd = options.opensslPath,
-            params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path];
-
-        exec(cmd, params, {encoding: 'binary'}, function (err, stdout, stderr) {
-            if (err) {
-                console.error(stdout, stderr);
+        fs.write(fd, plaintext, null, 'utf8', function(err){
+            if(err) {
+                removeTmp();
                 return cb(err);
             }
-            return cb(null, base64(stdout).replace(/\n/g, ''));
+
+            var cmd = options.opensslPath,
+                params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path];
+
+            exec(cmd, params, {encoding: 'binary'}, function (err, stdout, stderr) {
+                removeTmp();
+                if (err) {
+                    console.error(stdout, stderr);
+                    return cb(err);
+                }
+                return cb(null, base64(stdout).replace(/\n/g, ''));
+            });
         });
+
     });
 }
 
