@@ -6,6 +6,7 @@ var exec = require('child_process').execFile,
     pkey;
 tmp.setGracefulCleanup();
 
+// Create signed key from key and canonical request via CMD
 function sign_cmd(privateKey, plaintext, options, cb) {
     tmp.file(function(err, path) {
         if (err) return cb(err);
@@ -20,11 +21,15 @@ function sign_cmd(privateKey, plaintext, options, cb) {
                 console.error(stdout, stderr);
                 return cb(err);
             }
-            return cb(null,
-                new Buffer(stdout, 'binary').toString('base64').replace(/\n/g, '')
-            );
+            return cb(null, base64(stdout).replace(/\n/g, ''));
         });
     });
+}
+
+// Encode data with Base64
+function base64(data, enc){
+    enc = enc || 'binary';
+    return new Buffer(data, enc).toString('base64');
 }
 
 // Create a base64 encoded SHA1 hash from a string
