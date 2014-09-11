@@ -1,0 +1,6 @@
+{
+    "node1.org": "https://api.opscode.com/organizations/test/nodes/node1.org",
+    "node2.org": "https://api.opscode.com/organizations/test/nodes/node2.org",
+    "node3.org": "https://api.opscode.com/organizations/test/nodes/node3.org",
+    "node4.org": "https://api.opscode.com/organizations/test/nodes/node4.org"
+}

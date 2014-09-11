@@ -3,6 +3,9 @@ var authenticate = require('./chef/authenticate'),
     methods = ['delete', 'get', 'post', 'put'];
 
 function Chef(user, key, base, wrap_ssl, opensslPath) {
+    if (wrap_ssl && opensslPath && authenticate.fs.existsSync !== undefined && !authenticate.fs.existsSync(opensslPath)) {
+        return new Error(opensslPath + ': No such file or directory');
+    }
     this.user = user;
     this.key = key;
     this.base = base || '';
@@ -22,18 +25,17 @@ function req(method, uri, body, callback) {
     if (typeof body === 'function') { callback = body; body = undefined; }
 
     return authenticate.getHeaders(this, { body: body, method: method, uri: uri, wrap_ssl: this.wrap_ssl, opensslPath: this.opensslPath },
-      function(err, headers){
-        if(err){
-          return callback(err);
-        }
-        return request({
-          body: body,
-          headers: headers,
-          json: true,
-          method: method,
-          uri: uri
-        }, callback);
-    });
+        function(err, headers){
+            if(err) return callback(err);
+
+            return request({
+                body: body,
+                headers: headers,
+                json: true,
+                method: method,
+                uri: uri
+            }, callback);
+        });
 }
 
 methods.forEach(function (method) {
