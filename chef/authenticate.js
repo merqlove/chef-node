@@ -1,54 +1,43 @@
-var exec = require('child_process').exec,
+var exec = require('child_process').execFile,
     hash = require('crypto').createHash,
     url = require('url'),
     tmp = require('tmp'),
     fs = require('fs'),
     pkey;
+tmp.setGracefulCleanup();
 
-function sign_cmd(privateKey, plaintext, options, cb)
-{
+function sign_cmd(privateKey, plaintext, options, cb) {
   if (fs.existsSync !== undefined && !fs.existsSync(options.opensslPath)) {
     return cb(new Error(options.opensslPath + ': No such file or directory'));
   }
 
   tmp.file(function(err, path) {
-    if (err) {
-      tmp.setGracefulCleanup();
-      return cb(err);
-    }
+    if (err) return cb(err);
 
     fs.writeFileSync(path, plaintext);
 
-    tmp.file(function(err, out_path) {
-      if (err) {
-        tmp.setGracefulCleanup();
-        return cb(err);
-      }
+    tmp.file(function(err, sig_path) {
+      if (err) return cb(err);
 
-      var cmd = options.opensslPath + ' rsautl -sign -inkey ' + privateKey + ' -in ' + path + ' -out ' + out_path;
+      var cmd = options.opensslPath,
+          params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path, '-out', sig_path];
 
-      exec(cmd, {
-        maxBuffer: 2000 * 1024
-      }, function (err, stdout, stderr) {
-        fs.unlinkSync(path);
+      exec(cmd, params, function (err, stdout, stderr) {
         if (err) {
           console.error(stdout, stderr);
           return cb(err);
         }
-        return enc_cmd(out_path, options, cb);
+        return enc_cmd(sig_path, options, cb);
       });
     });
   });
 }
 
-function enc_cmd(sig_path, options, cb)
-{
-  var cmd = options.opensslPath + ' enc -base64 -in ' + sig_path;
+function enc_cmd(sig_path, options, cb) {
+  var cmd = options.opensslPath,
+      params = ['enc', '-base64', '-in', sig_path];
 
-  exec(cmd, {
-    maxBuffer: 2000 * 1024
-  }, function (err, stdout, stderr) {
-    fs.unlinkSync(sig_path);
+  exec(cmd, params, function (err, stdout, stderr) {
     if(err){
       console.error(stdout, stderr);
       return cb(err);
