@@ -12,34 +12,18 @@ function sign_cmd(privateKey, plaintext, options, cb) {
 
         fs.writeFileSync(path, plaintext);
 
-        tmp.file(function(err, sig_path) {
-            if (err) return cb(err);
+        var cmd = options.opensslPath,
+            params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path];
 
-            var cmd = options.opensslPath,
-                params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path, '-out', sig_path];
-
-            exec(cmd, params, function (err, stdout, stderr) {
-                if (err) {
-                    console.error(stdout, stderr);
-                    return cb(err);
-                }
-                return enc_cmd(sig_path, options, cb);
-            });
+        exec(cmd, params, {encoding: 'binary'}, function (err, stdout, stderr) {
+            if (err) {
+                console.error(stdout, stderr);
+                return cb(err);
+            }
+            return cb(null,
+                new Buffer(stdout, 'binary').toString('base64').replace(/\n/g, '')
+            );
         });
-    });
-}
-
-// F
-function enc_cmd(sig_path, options, cb) {
-    var cmd = options.opensslPath,
-        params = ['enc', '-base64', '-in', sig_path];
-
-    exec(cmd, params, function (err, stdout, stderr) {
-        if(err){
-            console.error(stdout, stderr);
-            return cb(err);
-        }
-        return cb(null, stdout.replace(/\n/g, ''));
     });
 }
 
