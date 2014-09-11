@@ -30,6 +30,22 @@ client.get('/nodes/foo', function(err, res, body) {
 });
 ```
 
+### Mode with OpenSSL Wrapper instead of unsupported URSA module.
+```javascript
+var fs = require('fs'),
+    chef = require('chef'),
+    key = '/path/to/key.file.pem',
+    client = chef.createClient('username', key, 'http://chef.server.com:4000', true);
+
+client.get('/nodes/foo', function(err, res, body) {
+    if (err) { return console.log(err); }
+    body.run_list.push('role[bar]');
+    client.put('/nodes/foo', body, function(err, res, body) {
+        console.log(err ? err : body);
+    });
+});
+```
+
 ## Methods
 
 The `client` object supports `delete`, `get`, `post` and `put` methods

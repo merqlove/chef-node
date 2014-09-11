@@ -1,14 +1,19 @@
 var authenticate = require('../../chef/authenticate'),
     expect = require('chai').expect,
     sinon = require('sinon'),
-    key = require('fs').readFileSync(__dirname + '/../fixtures/example.pem');
+    key = __dirname + '/../fixtures/example.pem'; // require('fs').readFileSync(__dirname + '/../fixtures/example.pem', 'utf8');
 
 describe('authenticate', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
         this.clock = sinon.useFakeTimers(0);
-        this.client = { user: 'test', key: authenticate.getKey(key) };
-        this.options = { body: '', uri: 'https://example.com/test' };
-        this.headers = authenticate.getHeaders(this.client, this.options);
+        this.client = { user: 'test', key: key };
+        this.options = { body: '', uri: 'https://example.com/test', wrap_ssl: true, opensslPath: '/usr/bin/openssl' };
+        var self = this;
+        authenticate.getHeaders(this.client, this.options, function(err, headers){
+          if(err) throw err;
+          self.headers = headers;
+          done(null, true);
+        });
     });
 
     afterEach(function () {

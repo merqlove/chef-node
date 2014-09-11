@@ -2,10 +2,12 @@ var authenticate = require('./chef/authenticate'),
     request = require('request'),
     methods = ['delete', 'get', 'post', 'put'];
 
-function Chef(user, key, base) {
+function Chef(user, key, base, wrap_ssl, opensslPath) {
     this.user = user;
-    this.key = authenticate.getKey(key);
-    this.base = base ? base : '';
+    this.key = key;
+    this.base = base || '';
+    this.wrap_ssl = wrap_ssl || false;
+    this.opensslPath = opensslPath || '/usr/bin/openssl';
 }
 
 function req(method, uri, body, callback) {
@@ -19,13 +21,19 @@ function req(method, uri, body, callback) {
     // a GET request.)
     if (typeof body === 'function') { callback = body; body = undefined; }
 
-    return request({
-        body: body,
-        headers: authenticate.getHeaders(this, { body: body, method: method, uri: uri }),
-        json: true,
-        method: method,
-        uri: uri
-    }, callback);
+    return authenticate.getHeaders(this, { body: body, method: method, uri: uri, wrap_ssl: this.wrap_ssl, opensslPath: this.opensslPath },
+      function(err, headers){
+        if(err){
+          return callback(err);
+        }
+        return request({
+          body: body,
+          headers: headers,
+          json: true,
+          method: method,
+          uri: uri
+        }, callback);
+    });
 }
 
 methods.forEach(function (method) {
@@ -34,6 +42,6 @@ methods.forEach(function (method) {
     };
 });
 
-exports.createClient = function (user, key, server) {
-    return new Chef(user, key, server);
+exports.createClient = function (user, key, server, wrap_ssl, opensslPath) {
+    return new Chef(user, key, server, wrap_ssl, opensslPath);
 };
