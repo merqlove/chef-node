@@ -24,7 +24,8 @@ function req(method, uri, body, callback) {
     // a GET request.)
     if (typeof body === 'function') { callback = body; body = undefined; }
 
-    return authenticate.getHeaders(this, { body: body, method: method, uri: uri, wrap_ssl: this.wrap_ssl, opensslPath: this.opensslPath },
+    return authenticate.getHeaders(this,
+        { body: body, method: method, uri: uri, wrap_ssl: this.wrap_ssl, opensslPath: this.opensslPath },
         function(err, headers){
             if(err) return callback(err);
 

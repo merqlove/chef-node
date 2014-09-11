@@ -17,10 +17,9 @@ function sign_cmd(privateKey, plaintext, options, cb) {
                 return cb(err);
             }
 
-            var cmd = options.opensslPath,
-                params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path];
+            var params = ['rsautl', '-sign', '-inkey', privateKey, '-in', path];
 
-            exec(cmd, params, {encoding: 'binary'}, function (err, stdout, stderr) {
+            exec(options.opensslPath, params, {encoding: 'binary'}, function (err, stdout, stderr) {
                 removeTmp();
                 if (err) {
                     console.error(stdout, stderr);
